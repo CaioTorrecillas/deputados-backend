@@ -2,6 +2,7 @@ package com.example.deputadosbackend.Controller;
 
 import com.example.deputadosbackend.Dto.DeputadoDetalhesDTO;
 import com.example.deputadosbackend.Dto.DeputadosDTO;
+import com.example.deputadosbackend.Dto.DespesaDTO;
 import com.example.deputadosbackend.Response.DeputadosResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.deputadosbackend.Service.DeputadosService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,5 +36,11 @@ public class DeputadosController {
         }
         return ResponseEntity.ok(deputado);
         //ResponseEntity.status(200).body(Map.of("message", "Login realizado"));
+    }
+
+
+    @GetMapping("/{id}/despesas")
+    public ResponseEntity<List<DespesaDTO>> listarDespesas(@PathVariable Long id) {
+        return ResponseEntity.ok(deputadosService.buscarDespesas(id));
     }
 }

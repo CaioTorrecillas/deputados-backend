@@ -29,8 +29,14 @@ public class SpringSecurity {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()   // login pode ser acessado sem token
-                        .anyRequest().authenticated()              // todo o resto precisa de token
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/users/salvar").permitAll()
+                        .requestMatchers("/deputados/**").permitAll()
+                        .requestMatchers("/proposicao/**").permitAll()
+                        .requestMatchers("/proposicao/{id}**").permitAll()
+                        .requestMatchers("/{id}/proposicoes").permitAll()
+                        .requestMatchers("/{id}/proposicoes").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

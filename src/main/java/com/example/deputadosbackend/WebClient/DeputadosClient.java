@@ -1,12 +1,12 @@
 package com.example.deputadosbackend.WebClient;
 
-import com.example.deputadosbackend.Dto.DeputadoDetalhesDTO;
-import com.example.deputadosbackend.Dto.DeputadoUltimoStatusDTO;
-import com.example.deputadosbackend.Dto.DeputadosDTO;
-import com.example.deputadosbackend.Dto.DeputadosWrapperDTO;
+import com.example.deputadosbackend.Dto.*;
+import com.example.deputadosbackend.Response.DeputadoDespesasResponseDTO;
 import org.springframework.stereotype.Component;
 import com.example.deputadosbackend.Response.DeputadosResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
 
 @Component
 public class DeputadosClient {
@@ -42,5 +42,16 @@ public class DeputadosClient {
         return dados;
 
 
+    }
+    public List<DespesaDTO> buscarDespesas(Long deputadoId) {
+
+        DeputadoDespesasResponseDTO response =
+                webClient.get()
+                        .uri("/deputados/{id}/despesas", deputadoId)
+                        .retrieve()
+                        .bodyToMono(DeputadoDespesasResponseDTO.class)
+                        .block();
+
+        return response != null ? response.getDados() : List.of();
     }
 }

@@ -35,7 +35,15 @@ public class JWT {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+    public String extractEmail(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
 
+        return claims.getSubject(); // retorna o email
+    }
     // Cria refresh token com jti (id) e retorna par: token + jti
     public TokenWithId createRefreshToken(String subject) {
         Date now = new Date();

@@ -3,6 +3,9 @@ package com.example.deputadosbackend.Model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 //import org.springframework.data.annotation.Id;
 
 @Getter
@@ -22,7 +25,13 @@ public class User {
     private String estado;
     private String cpf;
     private String cidade;
-
+    @ElementCollection
+    @CollectionTable(
+            name = "user_favorite_deputados",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "deputado_id")
+    private Set<Long> favoriteDeputados = new HashSet<>();
     @Transient
     private String senha;
 
