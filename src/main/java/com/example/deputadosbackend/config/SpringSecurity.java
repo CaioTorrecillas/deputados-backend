@@ -33,6 +33,7 @@ public class SpringSecurity {
                         .requestMatchers("/users/salvar").permitAll()
                         .requestMatchers("/deputados/**").permitAll()
                         .requestMatchers("/proposicao/**").permitAll()
+                        .requestMatchers("/proposicao/sincronizar-pl").permitAll()
                         .requestMatchers("/proposicao/{id}**").permitAll()
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/{id}/proposicoes").permitAll()
@@ -47,4 +48,3 @@ public class SpringSecurity {
         return config.getAuthenticationManager();
     }
 }
-

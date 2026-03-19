@@ -1,3 +1,5 @@
+
+
 package com.example.deputadosbackend.WebClient;
 
 import com.example.deputadosbackend.Dto.PageResponseDTO;
@@ -22,28 +24,54 @@ public class ProposicaoClient {
     private final WebClient webClient;
     ProposicaoClient() {
         this.webClient = WebClient.builder()
-            .baseUrl("https://dadosabertos.camara.leg.br/api/v2")
-            .build();
+                .baseUrl("https://dadosabertos.camara.leg.br/api/v2")
+                .build();
     }
 
     public List<ProposicaoDTO> buscarProjetosDeLei(Integer ano) {
-        UriComponentsBuilder uri = UriComponentsBuilder
-                .fromPath("/proposicoes")
-                .queryParam("siglaTipo", "PL");
 
-        if (ano != null) {
-            uri.queryParam("ano", ano);
+        List<ProposicaoDTO> todasProposicoes = new ArrayList<>();
+
+        int pagina = 1;
+        int itens = 100; // máximo permitido normalmente
+
+        while (true) {
+
+            UriComponentsBuilder uri = UriComponentsBuilder
+                    .fromPath("/proposicoes")
+                    .queryParam("siglaTipo", "PL")
+                    .queryParam("pagina", pagina)
+                    .queryParam("itens", itens);
+
+            if (ano != null) {
+                uri.queryParam("ano", ano);
+            }
+
+            ProposicaoResponse response = webClient
+                    .get()
+                    .uri(uri.build().toUriString())
+                    .retrieve()
+                    .bodyToMono(ProposicaoResponse.class)
+                    .block();
+
+            if (response == null || response.getDados().isEmpty()) {
+                break;
+            }
+
+            todasProposicoes.addAll(response.getDados());
+
+            // se veio menos que o limite, acabou
+            if (response.getDados().size() < itens) {
+                break;
+            }
+
+            pagina++;
         }
-        return webClient
-                .get()
-                .uri(uri.build().toUriString())
-                .retrieve()
-                .bodyToMono(ProposicaoResponse.class)
-                .map(ProposicaoResponse::getDados)
-                .block();
 
-
+        return todasProposicoes;
     }
+
+
     public ProposicaoPLDetalheDTO buscarDetalheProposicaoPL(Long id) {
         return webClient
                 .get()
@@ -93,7 +121,7 @@ public class ProposicaoClient {
                             .path("/proposicoes")
                             .queryParam("idDeputadoAutor", idDeputado)
                             .queryParam("itens", 100)
-                                .queryParam("pagina", paginaAtual)
+                            .queryParam("pagina", paginaAtual)
                             .build())
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<ProposicaoDadosTotaisResponse<ProposicaoDTO>>() {})

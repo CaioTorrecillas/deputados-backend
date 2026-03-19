@@ -1,3 +1,4 @@
+
 package com.example.deputadosbackend.Controller;
 
 import com.example.deputadosbackend.Dto.PageResponseDTO;
@@ -8,6 +9,7 @@ import com.example.deputadosbackend.Response.DeputadosResponse;
 import com.example.deputadosbackend.Response.ProposicaoResponse;
 import com.example.deputadosbackend.Service.ProposicaoService;
 import com.example.deputadosbackend.WebClient.ProposicaoClient;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -23,9 +25,21 @@ public class ProposicaoController {
     }
 
     @GetMapping("/projetos-lei")
-    public ProposicaoResponse getProjetosDeLei(@RequestParam(required = false) Integer ano) {
+    public ProposicaoResponse getProjetosDeLei(
+            @RequestParam(defaultValue = "2026") Integer ano) {
+
         return proposicaoService.listarProposicoes(ano);
     }
+
+
+    @PostMapping("/sincronizar-pl")
+    public String sincronizarPL(@RequestParam(required = false) Integer ano) {
+
+        proposicaoService.sincronizarProjetosDeLei(ano);
+
+        return "Projetos de Lei sincronizados com sucesso";
+    }
+
 
     @GetMapping("/detalhes/{id}")
     public ProposicaoPLDetalheDTO getProposicaoDetalhes(@PathVariable Long id) {
@@ -48,4 +62,10 @@ public class ProposicaoController {
         return proposicaoService
                 .listarProposicoesDeputadoDadosTotais(idDeputado);
     }
+    @GetMapping("/{id}/resumo")
+    public String gerarResumo(@PathVariable Long id) {
+
+        return proposicaoService.buscarOuGerarResumo(id);
+    }
 }
+
