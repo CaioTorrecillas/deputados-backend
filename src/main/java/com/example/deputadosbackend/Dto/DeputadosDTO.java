@@ -14,5 +14,6 @@ public class DeputadosDTO {
     private String uriPartido;
     private String urlFoto;
     private String siglaUf;
+    private Integer idLegislatura;
     // getters e setters
 }

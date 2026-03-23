@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -32,5 +34,12 @@ public class Proposicao {
     @Column(columnDefinition = "TEXT")
     private String resumoIa;
 
+    @ManyToMany
+    @JoinTable(
+            name = "proposicao_deputado",
+            joinColumns = @JoinColumn(name = "proposicao_id"),
+            inverseJoinColumns = @JoinColumn(name = "deputado_id")
+    )
+    private List<Deputado> deputados;
     // getters e setters
 }

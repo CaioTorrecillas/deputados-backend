@@ -30,13 +30,17 @@ public class SpringSecurity {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/users/salvar").permitAll()
+                        .requestMatchers("/users/**").permitAll() //remover posteriormente
                         .requestMatchers("/deputados/**").permitAll()
+                        .requestMatchers("/deputados").permitAll()
                         .requestMatchers("/proposicao/**").permitAll()
                         .requestMatchers("/proposicao/sincronizar-pl").permitAll()
                         .requestMatchers("/proposicao/{id}**").permitAll()
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/{id}/proposicoes").permitAll()
+                        .requestMatchers("/proposicao/vincular-autores").permitAll()
+
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

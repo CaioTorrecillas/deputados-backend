@@ -1,14 +1,12 @@
 
 package com.example.deputadosbackend.Controller;
 
-import com.example.deputadosbackend.Dto.PageResponseDTO;
-import com.example.deputadosbackend.Dto.ProposicaoDTO;
-import com.example.deputadosbackend.Dto.ProposicaoPLDetalheDTO;
-import com.example.deputadosbackend.Dto.ProposicoesDadosTotaisDTO;
+import com.example.deputadosbackend.Dto.*;
 import com.example.deputadosbackend.Response.DeputadosResponse;
 import com.example.deputadosbackend.Response.ProposicaoResponse;
 import com.example.deputadosbackend.Service.ProposicaoService;
 import com.example.deputadosbackend.WebClient.ProposicaoClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -24,20 +22,31 @@ public class ProposicaoController {
         this.proposicaoService = proposicaoService;
     }
 
-    @GetMapping("/projetos-lei")
-    public ProposicaoResponse getProjetosDeLei(
-            @RequestParam(defaultValue = "2026") Integer ano) {
 
-        return proposicaoService.listarProposicoes(ano);
+
+    @GetMapping("/{idDeputado}/proposicoes")
+    public PageResponseDTO<ProposicaoDTO> listarProposicoes(
+            @PathVariable Long idDeputado,
+            @RequestParam(defaultValue = "1") int pagina,
+            @RequestParam(required = false) String tipo
+    ) {
+        return proposicaoService
+                .listarProposicoesDeputado(idDeputado, pagina, tipo);
     }
 
+    @PostMapping("/sincronizar-projetolei")
+    public ResponseEntity<SyncResponseDTO> sincronizarPL() {
 
-    @PostMapping("/sincronizar-pl")
-    public String sincronizarPL(@RequestParam(required = false) Integer ano) {
+        SyncResponseDTO resultado =  proposicaoService.sincronizarProjetosDeLei();
 
-        proposicaoService.sincronizarProjetosDeLei(ano);
+        return ResponseEntity.ok(resultado);
 
-        return "Projetos de Lei sincronizados com sucesso";
+    }
+
+    @PostMapping("/vincular-autores")
+    public ResponseEntity<String> vincularAutores() {
+        proposicaoService.vincularAutoresProposicoes();
+        return ResponseEntity.ok("Autores vinculados com sucesso");
     }
 
 
@@ -46,14 +55,9 @@ public class ProposicaoController {
         return proposicaoService.buscarProposicaoDetalhe(id);
     }
 
-    @GetMapping("/{idDeputado}/proposicoes")
-    public Mono<PageResponseDTO<ProposicaoDTO>> listarProposicoes(
-            @PathVariable Long idDeputado,
-            @RequestParam(defaultValue = "1") int pagina
-    ) {
-        return proposicaoService
-                .listarProposicoesDeputado(idDeputado, pagina);
-    }
+
+
+
     @GetMapping("/{idDeputado}/proposicoes/dadosTotais")
     public ProposicoesDadosTotaisDTO listarProposicoesDadosTotais(
             @PathVariable Long idDeputado

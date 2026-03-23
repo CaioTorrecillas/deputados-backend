@@ -2,9 +2,7 @@
 
 package com.example.deputadosbackend.WebClient;
 
-import com.example.deputadosbackend.Dto.PageResponseDTO;
-import com.example.deputadosbackend.Dto.ProposicaoDTO;
-import com.example.deputadosbackend.Dto.ProposicaoPLDetalheDTO;
+import com.example.deputadosbackend.Dto.*;
 import com.example.deputadosbackend.Response.DeputadosResponse;
 import com.example.deputadosbackend.Response.ProposicaoDadosTotaisResponse;
 import com.example.deputadosbackend.Response.ProposicaoResponse;
@@ -27,8 +25,19 @@ public class ProposicaoClient {
                 .baseUrl("https://dadosabertos.camara.leg.br/api/v2")
                 .build();
     }
+    public List<AutorDTO> buscarAutores(Long idProposicao) {
 
-    public List<ProposicaoDTO> buscarProjetosDeLei(Integer ano) {
+        AutoresResponseDTO response = webClient.get()
+                .uri("/proposicoes/{id}/autores", idProposicao)
+                .retrieve()
+                .bodyToMono(AutoresResponseDTO.class)
+                .block();
+
+        return response != null ? response.getDados() : new ArrayList<>();
+    }
+
+
+    public List<ProposicaoDTO> buscarProjetosDeLei2025() {
 
         List<ProposicaoDTO> todasProposicoes = new ArrayList<>();
 
@@ -40,12 +49,14 @@ public class ProposicaoClient {
             UriComponentsBuilder uri = UriComponentsBuilder
                     .fromPath("/proposicoes")
                     .queryParam("siglaTipo", "PL")
+                    .queryParam("ano", 2025)
+                    .queryParam("ordenarPor", "id")
+                    .queryParam("ordem", "ASC")
                     .queryParam("pagina", pagina)
                     .queryParam("itens", itens);
 
-            if (ano != null) {
-                uri.queryParam("ano", ano);
-            }
+
+
 
             ProposicaoResponse response = webClient
                     .get()
@@ -89,18 +100,25 @@ public class ProposicaoClient {
 
     public Mono<ProposicaoResponse> buscarProposicoesPorDeputado(
             Long idDeputado,
-            int pagina
+            int pagina,
+            String tipo
     ) {
 
         return webClient
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/proposicoes")
-                        .queryParam("idDeputadoAutor", idDeputado)
-                        .queryParam("itens", 100)
-                        .queryParam("pagina", pagina)
-                        .build()
-                )
+                .uri(uriBuilder -> {
+                    uriBuilder
+                            .path("/proposicoes")
+                            .queryParam("idDeputadoAutor", idDeputado)
+                            .queryParam("itens", 100)
+                            .queryParam("pagina", pagina);
+
+                    if (tipo != null && !tipo.isEmpty()) {
+                        uriBuilder.queryParam("siglaTipo", tipo);
+                    }
+
+                    return uriBuilder.build();
+                })
                 .retrieve()
                 .bodyToMono(ProposicaoResponse.class);
     }
