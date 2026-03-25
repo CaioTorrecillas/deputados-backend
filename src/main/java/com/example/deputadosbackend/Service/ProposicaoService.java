@@ -1,24 +1,22 @@
 package com.example.deputadosbackend.Service;
 
-import com.example.deputadosbackend.Controller.ProposicaoController;
 import com.example.deputadosbackend.Dto.*;
 import com.example.deputadosbackend.Model.Deputado;
 import com.example.deputadosbackend.Model.Proposicao;
 import com.example.deputadosbackend.Repository.DeputadoRepository;
 import com.example.deputadosbackend.Repository.ProposicaoRepository;
-import com.example.deputadosbackend.Response.DeputadosResponse;
 import com.example.deputadosbackend.Response.ProposicaoDetalheResponse;
-import com.example.deputadosbackend.Response.ProposicaoResponse;
-import com.example.deputadosbackend.WebClient.DeputadosClient;
-import com.example.deputadosbackend.WebClient.HuggingFaceClient;
+
 import com.example.deputadosbackend.WebClient.ProposicaoClient;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
-import java.time.Year;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,14 +25,13 @@ public class ProposicaoService {
 
     private final ProposicaoClient proposicaoClient;
     private final ProposicaoRepository proposicaoRepository;
-    private final HuggingFaceClient huggingFaceClient;
 
-
+    @Value("${google.api.key}")
+    private String apiKey;
     private final DeputadoRepository  deputadoRepository;
-    public ProposicaoService(ProposicaoClient proposicaoClient, DeputadoRepository deputadoRepository,ProposicaoRepository proposicaoRepository, HuggingFaceClient huggingFaceClient) {
+    public ProposicaoService(ProposicaoClient proposicaoClient, DeputadoRepository deputadoRepository,ProposicaoRepository proposicaoRepository) {
         this.proposicaoClient = proposicaoClient;
         this.proposicaoRepository = proposicaoRepository;
-        this.huggingFaceClient = huggingFaceClient;
         this.deputadoRepository = deputadoRepository;
     }
 
@@ -233,24 +230,63 @@ public class ProposicaoService {
         response.setDados(detalheProposicao);
         return detalheProposicao;
     }
-    public String buscarOuGerarResumo(Long id) {
 
-        Proposicao p = proposicaoRepository.findById(id)
-                .orElseThrow();
+    public String gerarResumoProposicao(Long idProposicao) {
+        Client clientAi =  Client.builder().apiKey(apiKey).build();
 
-        if (p.getResumoIa() != null) {
-            return p.getResumoIa();
+
+        Proposicao proposicao = proposicaoRepository.findById(idProposicao)
+                .orElseThrow(() -> new RuntimeException("Proposição não encontrada"));
+
+        // 1. Validação
+        if (proposicao.getEmenta() == null || proposicao.getEmenta().isBlank()) {
+            return "Sem ementa disponível.";
         }
 
+        // 2. Cache (evita custo desnecessário)
+        if (proposicao.getResumoIa() != null && !proposicao.getResumoIa().isBlank()) {
+            return proposicao.getResumoIa();
+        }
 
-        String resumo = huggingFaceClient.gerarResumo(p.getEmenta());
+        try {
+            // 3. Prompt melhor estruturado
+            String prompt = """
+            Resuma a seguinte ementa de projeto de lei de forma simples e objetiva.
+            Use linguagem acessível para qualquer cidadão.
+            Máximo de 3 frases.
 
-        p.setResumoIa(resumo);
+            Ementa:
+            %s
+            """.formatted(proposicao.getEmenta());
 
-        proposicaoRepository.save(p);
+            GenerateContentResponse response =
+                    clientAi.models.generateContent(
+                            "gemini-2.5-flash-lite",
+                            prompt,
+                            null
+                    );
 
-        return resumo;
+
+                String resumo = response.text();
+
+            if (resumo == null || resumo.isBlank()) {
+                throw new RuntimeException("Resposta da IA vazia");
+            }
+
+
+            proposicao.setResumoIa(resumo);
+            proposicaoRepository.save(proposicao);
+
+            return resumo;
+
+        } catch (Exception e) {
+            // 6. Fallback seguro
+            System.out.println("Não foi possível gerar o resumo automaticamente no momento.Exception: " + e);
+            return "Não foi possível gerar o resumo automaticamente no momento.Exception: " + e;
+        }
     }
+
+
 
 
     public ProposicoesDadosTotaisDTO  listarProposicoesDeputadoDadosTotais(Long idDeputado){

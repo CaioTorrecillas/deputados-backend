@@ -39,6 +39,8 @@ public class SpringSecurity {
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/proposicao/vincular-autores").permitAll()
+                        .requestMatchers("/resumo/{id}").permitAll()
+
 
 
                         .anyRequest().authenticated()

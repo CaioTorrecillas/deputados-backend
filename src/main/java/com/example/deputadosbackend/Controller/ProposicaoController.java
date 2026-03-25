@@ -33,7 +33,13 @@ public class ProposicaoController {
         return proposicaoService
                 .listarProposicoesDeputado(idDeputado, pagina, tipo);
     }
+    @GetMapping("/resumo/{idProposicao}")
+    public ResponseEntity<String> gerarResumo(@PathVariable Long idProposicao) {
 
+        String resumo = proposicaoService.gerarResumoProposicao(idProposicao);
+
+        return ResponseEntity.ok(resumo);
+    }
     @PostMapping("/sincronizar-projetolei")
     public ResponseEntity<SyncResponseDTO> sincronizarPL() {
 
@@ -66,10 +72,6 @@ public class ProposicaoController {
         return proposicaoService
                 .listarProposicoesDeputadoDadosTotais(idDeputado);
     }
-    @GetMapping("/{id}/resumo")
-    public String gerarResumo(@PathVariable Long id) {
 
-        return proposicaoService.buscarOuGerarResumo(id);
-    }
 }
 
