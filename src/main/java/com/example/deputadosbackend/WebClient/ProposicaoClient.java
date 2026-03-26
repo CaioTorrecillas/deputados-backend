@@ -7,18 +7,24 @@ import com.example.deputadosbackend.Response.DeputadosResponse;
 import com.example.deputadosbackend.Response.ProposicaoDadosTotaisResponse;
 import com.example.deputadosbackend.Response.ProposicaoResponse;
 import com.example.deputadosbackend.Response.ProposicaoDetalheResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProposicaoClient {
 
+    private static final Logger log = LoggerFactory.getLogger(ProposicaoClient.class);
     private final WebClient webClient;
     ProposicaoClient() {
         this.webClient = WebClient.builder()
@@ -122,6 +128,7 @@ public class ProposicaoClient {
                 .retrieve()
                 .bodyToMono(ProposicaoResponse.class);
     }
+
 
     public List<ProposicaoDTO> buscarProposicoesDeputadoDadosTotais(Long idDeputado) {
 

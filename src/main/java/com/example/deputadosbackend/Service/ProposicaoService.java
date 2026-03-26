@@ -11,11 +11,14 @@ import com.example.deputadosbackend.WebClient.ProposicaoClient;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +28,7 @@ public class ProposicaoService {
 
     private final ProposicaoClient proposicaoClient;
     private final ProposicaoRepository proposicaoRepository;
-
+    private static final Logger log = LoggerFactory.getLogger(ProposicaoService.class);
     @Value("${google.api.key}")
     private String apiKey;
     private final DeputadoRepository  deputadoRepository;
@@ -143,6 +146,7 @@ public class ProposicaoService {
 
         return resultado;
     }
+
     public void vincularAutoresProposicoes() {
 
         List<Proposicao> proposicoes = proposicaoRepository.findAll();

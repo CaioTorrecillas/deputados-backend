@@ -9,7 +9,11 @@ import com.example.deputadosbackend.WebClient.ProposicaoClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/proposicao")
@@ -33,6 +37,7 @@ public class ProposicaoController {
         return proposicaoService
                 .listarProposicoesDeputado(idDeputado, pagina, tipo);
     }
+
     @GetMapping("/resumo/{idProposicao}")
     public ResponseEntity<String> gerarResumo(@PathVariable Long idProposicao) {
 

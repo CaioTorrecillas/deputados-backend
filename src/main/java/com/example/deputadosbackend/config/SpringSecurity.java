@@ -34,12 +34,16 @@ public class SpringSecurity {
                         .requestMatchers("/deputados/**").permitAll()
                         .requestMatchers("/deputados").permitAll()
                         .requestMatchers("/proposicao/**").permitAll()
+                        .requestMatchers("/proposicao/atividades").permitAll()
+                        .requestMatchers("/atividade/buscar").permitAll()
+                        .requestMatchers("/atividade/salvar").permitAll()
                         .requestMatchers("/proposicao/sincronizar-pl").permitAll()
                         .requestMatchers("/proposicao/{id}**").permitAll()
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/proposicao/vincular-autores").permitAll()
                         .requestMatchers("/resumo/{id}").permitAll()
+
 
 
 
