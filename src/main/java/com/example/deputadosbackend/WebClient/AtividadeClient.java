@@ -46,48 +46,85 @@ public class AtividadeClient {
         List<Map<String, Object>> todasVotacoes = new ArrayList<>();
         int pagina = 1;
 
-        while (pagina <= 1) {
+        while (pagina <= 3) {
+            int tentativas = 0;
+            int maxTentativas = pagina == 1 ? 5 : 3;
+            boolean sucesso = false;
             int paginaAtual = pagina;
-            System.out.println("{Proposicao Client} | Chamando API: /votacoes?pagina=" + paginaAtual);
+            while (tentativas < maxTentativas && !sucesso) {
+                try {
+                    System.out.println("--------------------------------------------------");
+                    System.out.println("{Proposicao Client} | Página: " + pagina + " | Tentativa: " + (tentativas + 1));
 
-            Map<String, Object> response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/votacoes")
-                            .queryParam("itens", 100)
-                            .queryParam("pagina", paginaAtual)
-                            .queryParam("dataFim", "2025-12-31")
-                            .build())
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .block(Duration.ofMinutes(5)); // espera até 5 minutos antes de dar timeout
+                    Map<String, Object> response = webClient.get()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path("/votacoes")
+                                    .queryParam("itens", 100)
+                                    .queryParam("pagina", paginaAtual)
+                                    .queryParam("dataFim", "2025-12-31")
+                                    .build())
+                            .retrieve()
+                            .bodyToMono(Map.class)
+                            .block();
 
-            if (response == null || !response.containsKey("dados")) {
-                break;
+                    System.out.println("{Proposicao Client} | ✅ Resposta recebida página " + pagina);
+
+                    if (response == null || !response.containsKey("dados")) {
+                        System.out.println("{Proposicao Client} | ⚠️ Resposta inválida");
+                        break;
+                    }
+
+                    List<Map<String, Object>> dados = (List<Map<String, Object>>) response.get("dados");
+                    List<Map<String, Object>> links = (List<Map<String, Object>>) response.get("links");
+
+                    int quantidade = dados != null ? dados.size() : 0;
+                    System.out.println("{Proposicao Client} | 📦 Itens recebidos: " + quantidade);
+
+                    if (dados != null) {
+                        dados.stream()
+                                .filter(this::isPlenario)
+                                .forEach(todasVotacoes::add);
+                    }
+
+                    boolean temProxima = links != null && links.stream()
+                            .anyMatch(link -> "next".equals(link.get("rel")));
+
+                    System.out.println("{Proposicao Client} | 🔄 Tem próxima? " + temProxima);
+
+                    sucesso = true; // deu certo 🎯
+
+                    if (!temProxima) {
+                        System.out.println("{Proposicao Client} | 🚫 Fim da paginação");
+                        pagina = 999;
+                    } else {
+                        pagina++;
+                    }
+
+                } catch (Exception e) {
+                    tentativas++;
+
+                    System.out.println("{Proposicao Client} | ❌ Erro na página " + pagina +
+                            " tentativa " + tentativas + ": " + e.getMessage());
+
+                    if (tentativas >= maxTentativas) {
+                        System.out.println("{Proposicao Client} | ⛔ Pulando página " + pagina);
+                        pagina++; // pula página ruim
+                        break;
+                    }
+
+                    try {
+                        int espera = 3000 * tentativas;
+                        System.out.println("{Proposicao Client} | ⏳ Aguardando " + espera + "ms para retry...");
+                        Thread.sleep(espera);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
-
-            List<Map<String, Object>> dados = (List<Map<String, Object>>) response.get("dados");
-            List<Map<String, Object>> links = (List<Map<String, Object>>) response.get("links");
-
-            if (dados != null) {
-                // 🔹 filtrar apenas votações do plenário
-                dados.stream()
-                        .filter(this::isPlenario)
-                        .forEach(todasVotacoes::add);
-            }
-
-            boolean temProxima = links != null && links.stream()
-                    .anyMatch(link -> "next".equals(link.get("rel")));
-
-            System.out.println("{Proposicao Client} | Página " + pagina + " processada, próxima? " + temProxima);
-
-            if (!temProxima) {
-                break;
-            }
-
-            pagina++;
         }
 
-        System.out.println("{Proposicao Client} | Todas as páginas processadas. Total de votações filtradas: " + todasVotacoes.size());
+        System.out.println("==================================================");
+        System.out.println("{Proposicao Client} | Total final: " + todasVotacoes.size());
         return todasVotacoes;
     }
 

@@ -59,7 +59,7 @@ public class AtividadeService {
                 atividade.setTipo("VOTACAO");
                 atividade.setReferenciaId(votacaoId);
 
-                String dataVotacaoStr = (String) voto.get("dataVotacao");
+                String dataVotacaoStr = (String) voto.get("dataRegistroVoto");
                 if (dataVotacaoStr != null) {
                     atividade.setDataAtividade(LocalDateTime.parse(dataVotacaoStr));
                 }
