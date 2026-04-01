@@ -36,6 +36,7 @@ public class SpringSecurity {
                         .requestMatchers("/proposicao/**").permitAll()
                         .requestMatchers("/proposicao/atividades").permitAll()
                         .requestMatchers("/atividade/buscar").permitAll()
+                        .requestMatchers("/atividade/sincronizar-votos").permitAll().requestMatchers("/atividade/gerar").permitAll()
                         .requestMatchers("/atividade/salvar").permitAll()
                         .requestMatchers("/proposicao/sincronizar-pl").permitAll()
                         .requestMatchers("/proposicao/{id}**").permitAll()
@@ -43,7 +44,7 @@ public class SpringSecurity {
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/proposicao/vincular-autores").permitAll()
                         .requestMatchers("/resumo/{id}").permitAll()
-
+                        .requestMatchers("/atividade/sincronizar-votacoes-25").permitAll()
 
 
 

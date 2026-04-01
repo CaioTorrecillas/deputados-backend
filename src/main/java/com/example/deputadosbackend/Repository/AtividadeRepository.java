@@ -4,4 +4,6 @@ import com.example.deputadosbackend.Model.Atividade;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AtividadeRepository  extends JpaRepository<Atividade, Long> {
+
+    boolean existsByReferenciaIdAndDeputadoId(String votacaoId, Long deputadoId );
 }
