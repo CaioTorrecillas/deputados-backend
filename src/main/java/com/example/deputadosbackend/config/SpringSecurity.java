@@ -44,11 +44,14 @@ public class SpringSecurity {
                         .requestMatchers("/{id}/proposicoes").permitAll()
                         .requestMatchers("/proposicao/vincular-autores").permitAll()
                         .requestMatchers("/resumo/{id}").permitAll()
+
                         .requestMatchers("/atividade/sincronizar-votacoes-25").permitAll()
+                                .requestMatchers("/atividade/deputado/{id}").permitAll()
 
 
 
-                        .anyRequest().authenticated()
+
+                                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

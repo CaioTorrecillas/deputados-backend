@@ -1,13 +1,11 @@
 package com.example.deputadosbackend.Controller;
 
 import com.example.deputadosbackend.Dto.AtividadeDTO;
+import com.example.deputadosbackend.Model.Atividade;
 import com.example.deputadosbackend.Service.AtividadeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +40,13 @@ public class AtividadeController {
     @PostMapping("/gerar")
     public ResponseEntity<?> gerarAtividades() {
         return ResponseEntity.ok(atividadeService.gerarAtividades());
+    }
+    @GetMapping("/deputado/{id}")
+    public ResponseEntity<?> buscarAtividadesPorDeputado(@PathVariable Long id) {
+
+        List<Atividade> atividades = atividadeService.buscarAtividadesPorDeputado(id);
+
+        return ResponseEntity.ok(atividades);
     }
 
 

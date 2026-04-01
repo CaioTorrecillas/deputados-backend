@@ -289,6 +289,17 @@ public class AtividadeService {
             System.out.println("{Votacao Service} | Erro ao extrair resultados: " + e.getMessage());
         }
     }
+    public List<Atividade> buscarAtividadesPorDeputado(Long deputadoId) {
+
+        List<Atividade> atividades =
+                atividadeRepository.findByDeputadoIdOrderByDataAtividadeDesc(deputadoId);
+
+        if (atividades.isEmpty()) {
+            System.out.println("{Atividade Service} | Nenhuma atividade encontrada para deputado: " + deputadoId);
+        }
+
+        return atividades;
+    }
     public Map<String, Object> gerarAtividades() {
 
         List<Voto> votos = votoRepository.findAll();
